@@ -2,6 +2,7 @@ from src.data_loader import load_prices, save_prices, save_weights
 from src.preprocessing import compute_returns
 from src.optimization import portfolio_optimization
 from src.metrics_calc import portfolio_return, portfolio_vol
+from src.plotting_frontier import plot_efficient_frontier
 
 
 stocks = ["PETR4.SA", "VALE3.SA", "ITUB4.SA", "BBAS3.SA", "NFLX34.SA"]
@@ -21,3 +22,5 @@ ret = portfolio_return(w, mu)
 vol = portfolio_vol(w, cov)
 
 save_weights(stocks, w)
+
+plot_efficient_frontier(mu, cov, w)
