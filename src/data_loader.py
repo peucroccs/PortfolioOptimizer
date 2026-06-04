@@ -17,7 +17,7 @@ def save_prices(stocks):
 def load_prices(path):
     return pd.read_csv(path, index_col=0, parse_dates=True)
 
-def save_weights(stocks, weights, path="models\\weights.json"):
+def save_weights(stocks, weights, path="results\\weights\\weights.json"):
     portfolio = dict(zip(stocks, weights))
 
     with open(path, "w") as f:
