@@ -53,4 +53,4 @@ def plot_efficient_frontier(mu, cov, optimal_weights,
 
     plt.grid(True)
 
-    plt.show()
+    plt.savefig("results/plots/efficient_frontier.png")
