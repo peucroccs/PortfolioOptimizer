@@ -19,38 +19,77 @@ def plot_efficient_frontier(mu, cov, optimal_weights,
         ret = portfolio_return(w, mu)
         vol = portfolio_vol(w, cov)
 
-        returns.append(ret)
-        risks.append(vol)
+        returns.append(ret*100)
+        risks.append(vol*100)
 
-    opt_ret = portfolio_return(optimal_weights, mu)
-    opt_vol = portfolio_vol(optimal_weights, cov)
+    opt_ret = portfolio_return(optimal_weights, mu) * 100
+    opt_vol = portfolio_vol(optimal_weights, cov) * 100
 
-    plt.figure(figsize=(10, 6))
+    plt.style.use("dark_background")
 
-    plt.scatter(
+    fig, ax = plt.subplots(figsize=(10, 6))
+
+    ax.set_facecolor("#0f1117")
+    fig.patch.set_facecolor("#0f1117")
+
+    ax.scatter(
         risks,
         returns,
         c=returns,
-        cmap="inferno",
+        cmap="Greens",
         s=10,
         alpha=0.5
     )
 
-    plt.scatter(
+    ax.scatter(
         opt_vol,
         opt_ret,
-        color='blue',
-        marker='*',
-        s=200,
-        label='Optimal Portfolio'
+        color="#22c55e",
+        marker="*",
+        s=250,
+        edgecolors="white",
+        linewidths=1,
+        label="Optimal Portfolio"
     )
 
-    plt.xlabel('Volatility (Risk)')
-    plt.ylabel('Expected Return')
-    plt.title('Markowitz Efficient Frontier')
+    ax.set_xlabel("Volatility - Risk (%)", color="white")
+    ax.set_ylabel("Expected Return (%)", color="white")
+    ax.set_title(
+        "Markowitz Efficient Frontier",
+        color="white",
+        pad=15,
+        fontsize=14
+    )
 
-    plt.legend()
+    ax.tick_params(colors="white")
 
-    plt.grid(True)
+    for spine in ax.spines.values():
+        spine.set_color("white")
 
-    plt.savefig("results/plots/efficient_frontier.png")
+    ax.grid(
+        True,
+        color="white",
+        alpha=0.15,
+        linestyle="--",
+        linewidth=0.8
+    )
+
+    
+    legend = ax.legend(
+        facecolor="#1a1f2e",
+        edgecolor="white"
+    )
+
+    for text in legend.get_texts():
+        text.set_color("white")
+
+    plt.tight_layout()
+
+    plt.savefig(
+        "results/plots/efficient_frontier.png",
+        dpi=300,
+        bbox_inches="tight",
+        facecolor="#0f1117"
+    )
+
+    plt.close(fig)
