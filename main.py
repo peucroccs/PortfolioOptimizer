@@ -89,9 +89,9 @@ section[data-testid="stSidebar"], #MainMenu, footer, header {
 }
 
 .panel {
-    border: 2px solid #22c55e;
+    border: 1px solid #263244;
     border-radius: 14px;
-    background: #f8fafc;
+    background: #111827bb;
     padding: 0.9rem 0.95rem;
 }
 
@@ -103,9 +103,9 @@ section[data-testid="stSidebar"], #MainMenu, footer, header {
 }
 
 .panel-title {
-    color: #166534;
+    color: #e2e8f0;
     font-size: 0.95rem;
-    font-weight: 700;
+    font-weight: 600;
 }
 
 .count-pill {
@@ -118,8 +118,8 @@ section[data-testid="stSidebar"], #MainMenu, footer, header {
 }
 
 .stock-card {
-    border: 1px solid #86efac;
-    background: #ffffff;
+    border: 1px solid #253349;
+    background: #0d1525;
     border-radius: 12px;
     padding: 0.55rem 0.7rem;
     display: flex;
@@ -138,8 +138,8 @@ section[data-testid="stSidebar"], #MainMenu, footer, header {
     width: 34px;
     height: 34px;
     border-radius: 8px;
-    background: #22c55e;
-    color: #052e16;
+    background: #263244;
+    color: #e2e8f0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -148,14 +148,14 @@ section[data-testid="stSidebar"], #MainMenu, footer, header {
 }
 
 .stock-ticker {
-    color: #14532d;
+    color: #f8fafc;
     font-size: 0.86rem;
     font-weight: 600;
     line-height: 1.2;
 }
 
 .stock-name {
-    color: #166534;
+    color: #8ea0b8;
     font-size: 0.73rem;
     line-height: 1.2;
 }
@@ -182,10 +182,10 @@ section[data-testid="stSidebar"], #MainMenu, footer, header {
 }
 
 [class*="st-key-clear_all"] button {
-    border: 1px solid #22c55e !important;
+    border: 1px solid #334155 !important;
     border-radius: 10px !important;
-    color: #166534 !important;
-    background: #f0fdf4 !important;
+    color: #cbd5e1 !important;
+    background: #111827 !important;
 }
 
 .status-card {
@@ -385,7 +385,6 @@ st.markdown(
     Build a B3 portfolio, run optimization, and inspect how the engine balances return and risk.
     The UI is structured to explain the outcome, not only display charts.
   </p>
-  <span class="method-chip">10y weekly data · long-only · max Sharpe · rf=0</span>
 </div>
 """,
     unsafe_allow_html=True,
@@ -413,6 +412,27 @@ with add_col:
 left_col, right_col = st.columns([1.08, 2.6], gap="large")
 
 with left_col:
+    run_clicked = st.button("Run optimization", key="run_engine", use_container_width=True, disabled=len(sel) < 2)
+    if run_clicked and len(sel) < 2:
+        st.warning("Select at least 2 assets to run optimization.")
+
+    if run_clicked and len(sel) >= 2:
+        st.session_state.ui_state = "running"
+        st.session_state.run_error = None
+        with st.spinner("Fetching market data and solving max-Sharpe allocation..."):
+            try:
+                engine_payload = run_engine(sel)
+                st.session_state.run_payload = normalize_payload(engine_payload)
+                st.session_state.ui_state = "success"
+                st.session_state.last_run_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            except Exception as exc:
+                st.session_state.run_payload = None
+                st.session_state.ui_state = "error"
+                st.session_state.run_error = str(exc)
+        st.rerun()
+
+    st.markdown("<div style='height:0.55rem'></div>", unsafe_allow_html=True)
+
     st.markdown(
         f"""
 <div class="panel">
@@ -453,29 +473,6 @@ with left_col:
         st.session_state.selected_stocks = []
         reset_results()
         st.rerun()
-
-    st.markdown("<div style='height:0.55rem'></div>", unsafe_allow_html=True)
-    run_clicked = st.button("Run optimization", key="run_engine", use_container_width=True, disabled=len(sel) < 2)
-    if run_clicked and len(sel) < 2:
-        st.warning("Select at least 2 assets to run optimization.")
-
-    if run_clicked and len(sel) >= 2:
-        st.session_state.ui_state = "running"
-        st.session_state.run_error = None
-        with st.spinner("Fetching market data and solving max-Sharpe allocation..."):
-            try:
-                engine_payload = run_engine(sel)
-                st.session_state.run_payload = normalize_payload(engine_payload)
-                st.session_state.ui_state = "success"
-                st.session_state.last_run_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            except Exception as exc:
-                st.session_state.run_payload = None
-                st.session_state.ui_state = "error"
-                st.session_state.run_error = str(exc)
-        st.rerun()
-
-    if len(sel) < 2:
-        st.caption("Run is enabled with at least 2 assets.")
 
 with right_col:
     run_payload = st.session_state.run_payload
