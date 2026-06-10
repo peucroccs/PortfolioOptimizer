@@ -1,177 +1,152 @@
 <div align="center">
 
-# Portfolio Optimization using Markowitz Theory
+# PortfolioOptimizer
 
-Construção e otimização de portfólios utilizando a Teoria Moderna do Portfólio (MPT) de Harry Markowitz para maximizar retorno ajustado ao risco.
+A Streamlit web app that builds and optimizes B3 (Brazilian stock exchange) portfolios using Markowitz's Modern Portfolio Theory. Pick your assets, run the solver, and get the max-Sharpe allocation with an interactive risk-return landscape.
 
-![Python](https://img.shields.io/badge/Python-3.11-blue)
-![Pandas](https://img.shields.io/badge/Pandas-Data%20Analysis-green)
-![NumPy](https://img.shields.io/badge/NumPy-Scientific%20Computing-orange)
-![SciPy](https://img.shields.io/badge/SciPy-Optimization-red)
+![Python](https://img.shields.io/badge/Python-3.13-blue)
+![Streamlit](https://img.shields.io/badge/Streamlit-1.58-red)
+![SciPy](https://img.shields.io/badge/SciPy-SLSQP-orange)
+![yFinance](https://img.shields.io/badge/data-yFinance-green)
 
 </div>
 
 ---
 
-## 📋 Table of Contents
+## Screenshots
 
-* [About The Project](#about-the-project)
-* [Methodology](#methodology)
-* [Project Structure](#project-structure)
-* [Technologies](#technologies)
-* [Installation](#installation)
-* [Usage](#usage)
-* [Results](#results)
-* [Future Improvements](#future-improvements)
-* [References](#references)
+**Empty state — pick your asset universe**
 
----
+![Empty state](docs/screenshots/01_empty.png)
 
-## About The Project
+**Four assets selected, ready to optimize**
 
-The goal of this project is to determine the optimal allocation of assets in a portfolio using the Modern Portfolio Theory (MPT) proposed by Harry Markowitz in 1952.
+![Selected](docs/screenshots/02_selected.png)
 
-The optimization process is based on key portfolio metrics, including:
+**Overview: expected return, volatility, and Sharpe ratio after optimization**
 
-- Expected Return
-- Risk (Volatility)
-- Sharpe Ratio
+![Overview](docs/screenshots/03_overview.png)
 
-By combining these metrics, the model identifies the portfolio with the highest Sharpe Ratio, providing the best risk-adjusted return among the available asset allocations.
+**Allocation tab: optimal weights as a bar chart and downloadable JSON**
+
+![Allocation](docs/screenshots/04_allocation.png)
+
+**Efficient Frontier tab: 5 000 random portfolios, star = max-Sharpe solution**
+
+![Frontier](docs/screenshots/05_frontier.png)
 
 ---
 
-## Theory Behind
+## How it works
 
-According to Modern Portfolio Theory (MPT), a portfolio is defined by its expected return and risk.
+The engine fetches daily closing prices from Yahoo Finance via yFinance, computes log returns, then solves for the portfolio weights that maximize the Sharpe Ratio using SciPy's SLSQP constrained optimizer.
 
-### Expected Return
-
-$$
-E(R_p) = \sum_{i=1}^{n} w_i R_i
-$$
-
-Where:
-- $w_i$ = weight of asset $i$
-- $R_i$ = expected return of asset $i$
-
----
-
-### Portfolio Volatility
+### Expected return
 
 $$
-\sigma_p = \sqrt{w^T \Sigma w}
+E(R_p) = \sum_{i=1}^{n} w_i \mu_i
 $$
 
-Where:
-- $w$ = vector of weights
-- $\Sigma$ = covariance matrix
-
----
-
-### Sharpe Ratio
+### Portfolio volatility
 
 $$
-SR = \frac{E(R_p) - R_f}{\sigma_p}
+\sigma_p = \sqrt{w^\top \Sigma \, w}
 $$
 
-Where:
-- $R_f$ = risk-free rate
-
----
-
-### Optimization Objective
+### Sharpe Ratio (risk-free rate = 0)
 
 $$
-\max_w \frac{E(R_p) - R_f}{\sigma_p}
+SR = \frac{E(R_p)}{\sigma_p}
 $$
 
-Subject to:
+### Optimization problem
 
 $$
-\sum_{i=1}^{n} w_i = 1
-$$
-
-$$
-w_i \geq 0
+\max_{w} \; \frac{E(R_p)}{\sigma_p}
+\quad \text{subject to} \quad
+\sum_{i=1}^{n} w_i = 1, \quad w_i \geq 0
 $$
 
 ---
 
-## Project Structure
+## Project structure
 
-```text
-portfolio-optimization/
-│
-├── data/
-│   ├── raw/
-│   └── processed/
-│
-├── results/
-│   ├── plots/
-│   ├── weights/
-│
-│
-├── notebooks/
-│
-├── src/
-│   ├── data_loader.py
-│   ├── preprocessing.py
-│   ├── metrics_calc.py
-│   ├── optimization.py
-│   └── visualization.py
-│
-├── main.py
-├── requirements.txt
-└── README.md
 ```
-
----
-
-## Technologies
-
-* Python
-* Pandas
-* NumPy
-* SciPy
-* Matplotlib
-* Seaborn
-* yFinance
+PortfolioOptimizer/
+├── main.py              # Streamlit UI
+├── tickers.json         # B3 ticker list with display names
+├── src/
+│   ├── engine.py        # Orchestrates data fetch → optimize → plot
+│   ├── data_loader.py   # yFinance download, price/weight persistence
+│   ├── preprocessing.py # Log-return computation
+│   ├── metrics_calc.py  # Portfolio return and volatility helpers
+│   ├── optimization.py  # SLSQP max-Sharpe solver
+│   ├── plot_weights.py  # Allocation bar chart
+│   └── plotting_frontier.py  # Efficient frontier scatter
+├── results/
+│   ├── plots/           # Generated PNG charts
+│   └── weights/         # Saved weights.json from last run
+└── pyproject.toml
+```
 
 ---
 
 ## Installation
 
+Requires Python 3.13+ and [uv](https://docs.astral.sh/uv/).
+
+```bash
+git clone https://github.com/peucroccs/PortfolioOptimizer.git
+cd PortfolioOptimizer
+uv sync
+```
+
+If you prefer plain pip:
+
+```bash
+pip install -r requirements.txt   # or: pip install .
+```
 
 ---
 
 ## Usage
 
+```bash
+uv run streamlit run main.py
+```
+
+Then open `http://localhost:8501` in your browser.
+
+1. Search for B3 tickers in the dropdown (e.g. `PETR4`, `VALE3`, `ITUB4`).
+2. Click **Add** for each asset you want in the portfolio (minimum 2).
+3. Click **Run optimization**.
+4. Inspect the three tabs: **Overview** for headline metrics, **Allocation** for the weight breakdown, and **Efficient Frontier** for the risk-return landscape.
+5. Download the optimized weights as JSON from the Allocation tab.
 
 ---
 
-## Results
+## Tech stack
 
-### Efficient Frontier
-
-
-### Optimal Portfolio Allocation
-
-
-### Portfolio Metrics
-
-
----
-
-## Future Improvements
-
+| Library | Role |
+|---|---|
+| [Streamlit](https://streamlit.io) | Web UI |
+| [yFinance](https://github.com/ranaroussi/yfinance) | Market data |
+| [SciPy](https://scipy.org) | SLSQP optimizer |
+| [NumPy](https://numpy.org) | Matrix math |
+| [Pandas](https://pandas.pydata.org) | Data wrangling |
+| [Matplotlib](https://matplotlib.org) | Chart rendering |
 
 ---
 
 ## References
 
+- Markowitz, H. (1952). *Portfolio Selection*. The Journal of Finance, 7(1), 77–91.
+- Sharpe, W. F. (1966). *Mutual Fund Performance*. The Journal of Business, 39(1), 119–138.
 
 ---
 
-## Author
+## Authors
 
+Raphael Quintanilha — [github.com/raphaelfq](https://github.com/raphaelfq)
+
+Peter Croccer — [github.com/peucroccs](https://github.com/peucroccs)
