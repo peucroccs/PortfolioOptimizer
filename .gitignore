@@ -1,0 +1,14 @@
+# Cursor
+.cursor/
+
+# uv
+.venv/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Env
+.env
+.env.*
