@@ -1,7 +1,6 @@
 import json
-import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
 import os
+import matplotlib.pyplot as plt
 
 def plot_weights():
     with open("results/weights/weights.json", "r", encoding="utf-8") as f:
@@ -11,8 +10,8 @@ def plot_weights():
     values  = list(weights.values())
 
     fig, ax = plt.subplots(figsize=(10, 5))
-    fig.patch.set_facecolor("#0f1117")
-    ax.set_facecolor("#0f1117")
+    fig.patch.set_facecolor("#070b13")
+    ax.set_facecolor("#101a2c")
 
     colors = ["#22c55e" if v == max(values) else "#16a34a" for v in values]
     bars = ax.bar(tickers, [v * 100 for v in values], color=colors, width=0.5, zorder=3)
@@ -23,17 +22,17 @@ def plot_weights():
             bar.get_height() + 0.5,
             f"{v * 100:.1f}%",
             ha="center", va="bottom",
-            color="#e2e8f0", fontsize=10, fontweight="bold"
+            color="#e5edf7", fontsize=10, fontweight="bold"
         )
 
-    ax.set_title("Optimal Portfolio Weights", color="#e2e8f0", fontsize=14, fontweight="bold", pad=16)
-    ax.set_ylabel("Weight (%)", color="#94a3b8", fontsize=11)
-    ax.set_xlabel("Ticker", color="#94a3b8", fontsize=11)
-    ax.tick_params(colors="#94a3b8")
-    ax.yaxis.grid(True, color="#2a3142", linestyle="--", linewidth=0.7, zorder=0)
+    ax.set_title("Optimal Allocation Weights", color="#e5edf7", fontsize=14, fontweight="bold", pad=16)
+    ax.set_ylabel("Weight (%)", color="#9fb1c8", fontsize=11)
+    ax.set_xlabel("Ticker", color="#9fb1c8", fontsize=11)
+    ax.tick_params(colors="#9fb1c8")
+    ax.yaxis.grid(True, color="#2f415f", linestyle="--", linewidth=0.7, zorder=0)
     ax.set_axisbelow(True)
     for spine in ax.spines.values():
-        spine.set_edgecolor("#2a3142")
+        spine.set_edgecolor("#2f415f")
 
     plt.tight_layout()
 
