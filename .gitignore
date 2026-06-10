@@ -1,0 +1,46 @@
+# Cursor / IDE
+.cursor/
+.idea/
+.vscode/
+
+# uv / virtual environments
+.venv/
+venv/
+env/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# Test & lint
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Secrets
+.env
+.env.*
+.streamlit/secrets.toml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Generated at runtime — recreated on each Run
+data/raw/*.csv
+results/plots/*
+results/weights/*
+
+# Keep directory structure
+!data/raw/.gitkeep
+!results/plots/.gitkeep
+!results/weights/.gitkeep

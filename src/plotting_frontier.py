@@ -4,8 +4,7 @@ import matplotlib.pyplot as plt
 from src.metrics_calc import portfolio_return, portfolio_vol
 
 
-def plot_efficient_frontier(mu, cov, optimal_weights,
-                            n_portfolios=5000):
+def plot_efficient_frontier(mu, cov, optimal_weights, n_portfolios=5000):
 
     risks = []
     returns = []
@@ -25,12 +24,10 @@ def plot_efficient_frontier(mu, cov, optimal_weights,
     opt_ret = portfolio_return(optimal_weights, mu) * 100
     opt_vol = portfolio_vol(optimal_weights, cov) * 100
 
-    plt.style.use("dark_background")
-
     fig, ax = plt.subplots(figsize=(10, 6))
 
-    ax.set_facecolor("#0f1117")
-    fig.patch.set_facecolor("#0f1117")
+    ax.set_facecolor("#101a2c")
+    fig.patch.set_facecolor("#070b13")
 
     ax.scatter(
         risks,
@@ -47,41 +44,37 @@ def plot_efficient_frontier(mu, cov, optimal_weights,
         color="#22c55e",
         marker="*",
         s=250,
-        edgecolors="white",
+        edgecolors="#e5edf7",
         linewidths=1,
-        label="Optimal Portfolio"
+        label="Max-Sharpe Portfolio",
     )
 
-    ax.set_xlabel("Volatility - Risk (%)", color="white")
-    ax.set_ylabel("Expected Return (%)", color="white")
+    ax.set_xlabel("Volatility - Risk (%)", color="#e5edf7")
+    ax.set_ylabel("Expected Return (%)", color="#e5edf7")
     ax.set_title(
-        "Markowitz Efficient Frontier",
-        color="white",
+        "Risk-Return Landscape (Markowitz)",
+        color="#e5edf7",
         pad=15,
-        fontsize=14
+        fontsize=14,
     )
 
-    ax.tick_params(colors="white")
+    ax.tick_params(colors="#c2d0e0")
 
     for spine in ax.spines.values():
-        spine.set_color("white")
+        spine.set_color("#2f415f")
 
     ax.grid(
         True,
-        color="white",
-        alpha=0.15,
+        color="#2f415f",
+        alpha=0.55,
         linestyle="--",
-        linewidth=0.8
+        linewidth=0.8,
     )
 
-    
-    legend = ax.legend(
-        facecolor="#1a1f2e",
-        edgecolor="white"
-    )
+    legend = ax.legend(facecolor="#101a2c", edgecolor="#2f415f")
 
     for text in legend.get_texts():
-        text.set_color("white")
+        text.set_color("#e5edf7")
 
     plt.tight_layout()
 
@@ -89,7 +82,7 @@ def plot_efficient_frontier(mu, cov, optimal_weights,
         "results/plots/efficient_frontier.png",
         dpi=300,
         bbox_inches="tight",
-        facecolor="#0f1117"
+        facecolor="#070b13",
     )
 
     plt.close(fig)
