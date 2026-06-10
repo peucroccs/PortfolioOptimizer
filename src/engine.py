@@ -1,4 +1,4 @@
-from src.data_loader import load_prices, save_prices, save_weights
+from src.data_loader import load_prices, save_prices, save_weights, PRICES_PATH
 from src.preprocessing import compute_returns
 from src.optimization import portfolio_optimization
 from src.metrics_calc import portfolio_return, portfolio_vol
@@ -9,7 +9,7 @@ def run_engine(stocks):
 
     save_prices(stocks)
 
-    close_prices_df = load_prices("data//raw//close_prices.csv")
+    close_prices_df = load_prices(PRICES_PATH)
     returns_df = compute_returns(close_prices_df)
 
     mu = returns_df.mean().values

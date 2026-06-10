@@ -100,17 +100,8 @@ section[data-testid="stSidebar"] { display: none; }
 .stock-ticker { font-weight: 600; font-size: 0.88rem; line-height: 1.3; }
 .stock-name   { font-size: 0.72rem; color: #64748b; line-height: 1.3; }
 
-/* X button column — prevent clipping */
-div[data-testid="stHorizontalBlock"] > div:last-child {
-    overflow: visible !important;
-    min-width: 44px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-}
-
-/* All buttons inside the X column */
-div[data-testid="stHorizontalBlock"] > div:last-child div[data-testid="stButton"] button {
+/* Remove-stock (✕) buttons */
+[class*="st-key-rm_"] button {
     background: #ef444420 !important;
     border: 1.5px solid #ef4444 !important;
     color: #ef4444 !important;
@@ -129,7 +120,7 @@ div[data-testid="stHorizontalBlock"] > div:last-child div[data-testid="stButton"
     justify-content: center !important;
     margin-top: 8px !important;
 }
-div[data-testid="stHorizontalBlock"] > div:last-child div[data-testid="stButton"] button:hover {
+[class*="st-key-rm_"] button:hover {
     background: #ef444440 !important;
 }
 
@@ -175,16 +166,85 @@ div[data-testid="stHorizontalBlock"] > div:last-child div[data-testid="stButton"
 }
 
 /* + add button */
-div[data-testid="stButton"]:has(button[kind="secondary"]:not([data-testid^="rm_"])) button {
+.st-key-add_stock button {
     background: #22c55e !important;
     border: 1.5px solid #22c55e !important;
     color: #0f1117 !important;
     border-radius: 8px !important;
     font-size: 1.1rem !important;
     font-weight: 700 !important;
+    min-height: 38px !important;
+    transition: background 0.15s, box-shadow 0.15s !important;
+}
+.st-key-add_stock button:hover {
+    background: #16a34a !important;
+    border-color: #16a34a !important;
+    box-shadow: 0 0 12px #22c55e44 !important;
 }
 
+/* Stock search selectbox */
 div[data-testid="stSelectbox"] label { display: none; }
+div[data-testid="stSelectbox"] > div > div {
+    background-color: #1a1f2e !important;
+    border: 1px solid #2a3142 !important;
+    border-radius: 10px !important;
+    color: #e2e8f0 !important;
+}
+div[data-testid="stSelectbox"] div[data-baseweb="select"] > div {
+    background-color: #1a1f2e !important;
+    border-color: #2a3142 !important;
+    color: #e2e8f0 !important;
+}
+div[data-testid="stSelectbox"] div[data-baseweb="select"]:hover > div,
+div[data-testid="stSelectbox"] div[data-baseweb="select"]:focus-within > div {
+    border-color: #22c55e !important;
+    box-shadow: 0 0 0 1px #22c55e44 !important;
+}
+div[data-testid="stSelectbox"] svg { fill: #94a3b8 !important; }
+div[data-baseweb="popover"] li[aria-selected="true"],
+div[data-baseweb="popover"] li:hover {
+    background-color: #22c55e22 !important;
+}
+div[data-baseweb="popover"] {
+    background-color: #1a1f2e !important;
+    border: 1px solid #2a3142 !important;
+    border-radius: 10px !important;
+}
+div[data-baseweb="popover"] li {
+    color: #e2e8f0 !important;
+}
+
+/* Portfolio metrics cards */
+.metrics-row {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 16px;
+}
+.metric-card {
+    flex: 1;
+    background: #1a1f2e;
+    border: 1px solid #2a3142;
+    border-radius: 12px;
+    padding: 16px 20px;
+}
+.metric-label {
+    font-size: 0.78rem;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 6px;
+}
+.metric-value {
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: #22c55e;
+    line-height: 1.2;
+}
+.metric-unit {
+    font-size: 0.82rem;
+    color: #94a3b8;
+    font-weight: 500;
+}
 
 /* Fixed Run button */
 .run-btn-wrapper {
@@ -259,6 +319,9 @@ if "selected_stocks" not in st.session_state:
 if "ran" not in st.session_state:
     st.session_state.ran = False
 
+if "portfolio_metrics" not in st.session_state:
+    st.session_state.portfolio_metrics = None
+
 sel = st.session_state.selected_stocks
 
 # ── Top bar ───────────────────────────────────────────────────────────────────
@@ -283,9 +346,12 @@ with s_col:
         label_visibility="collapsed",
     )
 with btn_col:
-    if st.button("➕", use_container_width=True) and chosen not in sel:
-        sel.append(chosen)
-        st.rerun()
+    if st.button("➕", key="add_stock", use_container_width=True) and chosen:
+        if chosen not in sel:
+            sel.append(chosen)
+            st.session_state.ran = False
+            st.session_state.portfolio_metrics = None
+            st.rerun()
 
 st.markdown("<div style='height:14px'></div>", unsafe_allow_html=True)
 
@@ -299,7 +365,7 @@ with left_col:
         run_submitted = st.form_submit_button("▶   Run", use_container_width=True)
 
     if run_submitted and sel:
-        run_engine(sel)
+        st.session_state.portfolio_metrics = run_engine(sel)
         st.session_state.ran = True
         st.rerun()
 
@@ -331,11 +397,15 @@ with left_col:
         with c2:
             if st.button("✕", key=f"rm_{ticker}"):
                 sel.remove(ticker)
+                st.session_state.ran = False
+                st.session_state.portfolio_metrics = None
                 st.rerun()
 
     st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
     if st.button("Clear all", use_container_width=True):
         st.session_state.selected_stocks = []
+        st.session_state.ran = False
+        st.session_state.portfolio_metrics = None
         st.rerun()
 
 # ── RIGHT panel ───────────────────────────────────────────────────────────────
@@ -356,6 +426,21 @@ with right_col:
               {len(sel)} asset(s) loaded successfully!
             </div>
             """, unsafe_allow_html=True)
+
+            if st.session_state.ran and st.session_state.portfolio_metrics:
+                ret, vol = st.session_state.portfolio_metrics
+                st.markdown(f"""
+                <div class="metrics-row">
+                  <div class="metric-card">
+                    <div class="metric-label">Expected Return</div>
+                    <div class="metric-value">{ret * 100:.2f}<span class="metric-unit"> %/yr</span></div>
+                  </div>
+                  <div class="metric-card">
+                    <div class="metric-label">Volatility (Risk)</div>
+                    <div class="metric-value">{vol * 100:.2f}<span class="metric-unit"> %/yr</span></div>
+                  </div>
+                </div>
+                """, unsafe_allow_html=True)
 
             weights_chart = "results/plots/weights_chart.png"
             if st.session_state.ran and os.path.exists(weights_chart):
